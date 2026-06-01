@@ -1,4 +1,20 @@
-const CACHE = 'ladepark-v1';
-const ASSETS = ['./', './index.html', './styles.css', './src/ui.js', './src/engine.js', './src/store.js', './src/charts.js', './src/export.js'];
-self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))));
-self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+/* Selbstzerstörungs-Service-Worker.
+   Ersetzt den früheren Cache-Worker ('ladepark-v1'), der veraltete
+   Seiten ausgeliefert hat. Sobald der Browser diese Datei abruft,
+   werden alle Caches geleert, die Registrierung entfernt und alle
+   offenen Tabs neu geladen — danach kommt immer die aktuelle Seite. */
+self.addEventListener('install', () => self.skipWaiting());
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+      await self.registration.unregister();
+      const clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach((client) => client.navigate(client.url));
+    } catch (e) { /* ignorieren */ }
+  })());
+});
+
+/* Kein fetch-Handler: nichts wird mehr aus dem Cache bedient. */
