@@ -1,0 +1,9 @@
+{
+  "name": "Ladepark Invest Dashboard",
+  "short_name": "Ladepark Invest",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#1B2D5E",
+  "icons": []
+}
